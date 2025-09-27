@@ -1,27 +1,53 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 # Flutter_Onboarding_App
-Flutter Onboarding App based on the provided Figma design.
-=======
->>>>>>> 71ae008 (App Screenshorts added)
-# onboarding_app
 
-A new Flutter project.
+Flutter Onboarding App based on the provided Figma design.  
+This app guides users through onboarding screens, requests location input, and allows them to create and manage alarms with toggle functionality.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 1. Project Setup Instructions
 
-A few resources to get you started if this is your first Flutter project:
+Follow these steps to get the project running locally:
+1. Clone the repository: git clone https://github.com/sazzad1620/Flutter_Onboarding_App.git
+2. Navigate to the project directory: cd Flutter_Onboarding_App
+3. Install dependencies: flutter pub get
+4. Run the app: flutter run
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-<<<<<<< HEAD
-=======
->>>>>>> aedc035 (Initial commit: Flutter Onboarding App task)
->>>>>>> 71ae008 (App Screenshorts added)
+## 2. Tools/packages used
+
+- provider – State management
+- geolocator – Get device’s current location
+- geocoding – Convert coordinates into human-readable addresses
+- shared_preferences – Store simple key-value data locally
+- timezone – Time zone handling
+- flutter_native_timezone – Get device’s native timezone
+- intl – Date & time formatting
+- flutter_local_notifications – Local notifications for alarms
+
+  
+## 3. Screenshorts
+
+### Onboarding Screens
+<p align="center">
+  <img src="assets/screenshorts/onboarding1.png" width="300"/>&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshorts/onboarding2.png" width="300"/>&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshorts/onboarding3.png" width="300"/>
+</p>
+
+
+### Location Screens
+<p align="center">
+  <img src="assets/screenshorts/location1.png" width="300"/>&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshorts/location2.png" width="300"/>
+</p>
+
+### Alarm Screen
+<p align="center">
+  <img src="assets/screenshorts/alarm.png" width="300"/>
+</p>
+
+
+
+
+
