@@ -1,112 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:convert';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'alarm_model.dart';
+import 'notification_service.dart';
 
 class AlarmProvider extends ChangeNotifier {
-  List<DateTime> _alarms = [];
-  List<DateTime> get alarms => _alarms;
+  List<AlarmModel> _alarms = [];
+  List<AlarmModel> get alarms => _alarms;
 
-  List<bool> _toggles = [];
-  List<bool> get toggles => _toggles;
-
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final NotificationService _notificationService = NotificationService();
 
   bool _notificationsInitialized = false;
   bool _timezoneSet = false;
-  final List<DateTime> _pendingAlarms = [];
+
+  // Keep pending alarms until notifications + timezone are ready
+  final List<AlarmModel> _pendingAlarms = [];
 
   String? selectedLocation;
 
   AlarmProvider() {
     _initNotifications();
-    _setTimezoneAutomatically();
   }
 
+  // Initialization
   Future<void> _initNotifications() async {
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final InitializationSettings initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: DarwinInitializationSettings(),
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
-    _notificationsInitialized = true;
+    await _notificationService.init();
+    _notificationsInitialized = _notificationService.isInitialized;
 
     // Load saved alarms after notifications are initialized
     await loadAlarms();
-  }
 
-  Future<void> _setTimezoneAutomatically() async {
-    tz.initializeTimeZones();
-    try {
-      String tzName = await FlutterNativeTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(tzName));
-    } catch (e) {
-      tz.setLocalLocation(tz.getLocation('UTC'));
-    }
     _timezoneSet = true;
 
-    // Schedule any pending alarms
-    for (var alarm in _alarms) {
-      _scheduleNotification(alarm);
-    }
+    // Schedule all enabled alarms + pending alarms
+    await _rescheduleEnabledAndPendingAlarms();
   }
 
-  void addAlarm(DateTime alarm) {
-    _alarms.add(alarm);
-    _toggles.add(true); // default on
-    _alarms.sort();
+  Future<void> _rescheduleEnabledAndPendingAlarms() async {
+    if (!_notificationsInitialized || !_timezoneSet) return;
+
+    // Schedule enabled alarms from storage
+    for (var alarm in _alarms) {
+      if (alarm.isEnabled) {
+        await _scheduleNotification(alarm);
+      }
+    }
+
+    // Schedule any pending alarms that were added before init
+    for (var p in _pendingAlarms) {
+      if (p.isEnabled) await _scheduleNotification(p);
+    }
+    _pendingAlarms.clear();
+  }
+
+  // CRUD
+  void addAlarm(DateTime alarmTime) {
+    final model = AlarmModel(time: alarmTime, isEnabled: true);
+    _alarms.add(model);
+    _alarms.sort((a, b) => a.time.compareTo(b.time));
     saveAlarms();
 
     if (_notificationsInitialized && _timezoneSet) {
-      _scheduleNotification(alarm);
+      _scheduleNotification(model);
     } else {
-      _pendingAlarms.add(alarm);
+      _pendingAlarms.add(model);
     }
 
     notifyListeners();
   }
 
   void toggleAlarm(int index) {
-    if (index < 0 || index >= _toggles.length) return;
+    if (index < 0 || index >= _alarms.length) return;
 
-    _toggles[index] = !_toggles[index];
+    final alarm = _alarms[index];
+    alarm.isEnabled = !alarm.isEnabled;
     saveAlarms();
+
+    if (alarm.isEnabled) {
+      if (_notificationsInitialized && _timezoneSet) {
+        _scheduleNotification(alarm);
+      } else {
+        _pendingAlarms.add(alarm);
+      }
+    } else {
+      _cancelNotification(alarm);
+      _pendingAlarms.removeWhere((a) => a.time == alarm.time);
+    }
+
     notifyListeners();
   }
+
+  Future<void> deleteAlarm(int index) async {
+    if (index < 0 || index >= _alarms.length) return;
+
+    final alarm = _alarms[index];
+    await _cancelNotification(alarm);
+
+    _pendingAlarms.removeWhere((a) => a.time == alarm.time);
+
+    _alarms.removeAt(index);
+    await saveAlarms();
+    notifyListeners();
+  }
+
+  Future<void> removeAlarm(int index) => deleteAlarm(index);
 
   void setLocation(String location) {
     selectedLocation = location;
     notifyListeners();
   }
 
+  // Persistence
   Future<void> loadAlarms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? alarmsJson = prefs.getString('alarms');
-    String? togglesJson = prefs.getString('toggles');
 
     if (alarmsJson != null) {
       List<dynamic> list = jsonDecode(alarmsJson);
-      _alarms = list.map((e) => DateTime.parse(e)).toList();
-    }
-
-    if (togglesJson != null) {
-      List<dynamic> list = jsonDecode(togglesJson);
-      _toggles = list.map((e) => e as bool).toList();
+      _alarms = list.map((e) => AlarmModel.fromJson(e)).toList();
     } else {
-      _toggles = List<bool>.filled(_alarms.length, true);
-    }
-
-    // Schedule all enabled alarms
-    for (int i = 0; i < _alarms.length; i++) {
-      if (_toggles[i]) _scheduleNotification(_alarms[i]);
+      _alarms = [];
     }
 
     notifyListeners();
@@ -114,53 +127,32 @@ class AlarmProvider extends ChangeNotifier {
 
   Future<void> saveAlarms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String alarmsJson = jsonEncode(
-      _alarms.map((e) => e.toIso8601String()).toList(),
-    );
+    String alarmsJson = jsonEncode(_alarms.map((e) => e.toJson()).toList());
     await prefs.setString('alarms', alarmsJson);
-
-    String togglesJson = jsonEncode(_toggles);
-    await prefs.setString('toggles', togglesJson);
   }
 
-  void _scheduleNotification(DateTime alarm) async {
+  // -------------------- Notifications --------------------
+  Future<void> _scheduleNotification(AlarmModel alarm) async {
     if (!_notificationsInitialized || !_timezoneSet) return;
 
-    int id = alarm.millisecondsSinceEpoch.remainder(100000);
+    int id = alarm.time.millisecondsSinceEpoch.remainder(100000);
 
     final now = DateTime.now();
-    DateTime scheduledDate = alarm.isBefore(now)
-        ? alarm.add(Duration(days: 1))
-        : alarm;
+    DateTime scheduledDate = alarm.time.isBefore(now)
+        ? alarm.time.add(Duration(days: 1))
+        : alarm.time;
 
-    final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(
-      scheduledDate,
-      tz.local,
+    await _notificationService.scheduleNotification(
+      dateTime: scheduledDate,
+      id: id,
+      title: 'Alarm',
+      body:
+          'It\'s time: ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
     );
+  }
 
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          'alarm_channel',
-          'Alarms',
-          channelDescription: 'Channel for alarm notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-          playSound: true,
-        );
-
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(),
-    );
-
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      'Alarm',
-      'It\'s time: ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
-      tzScheduledDate,
-      platformDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+  Future<void> _cancelNotification(AlarmModel alarm) async {
+    int id = alarm.time.millisecondsSinceEpoch.remainder(100000);
+    await _notificationService.cancelNotification(id);
   }
 }

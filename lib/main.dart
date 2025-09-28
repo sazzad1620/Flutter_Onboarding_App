@@ -3,8 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/alarm/alarm_provider.dart'; // import your AlarmProvider
+import 'features/alarm/notification_service.dart'; // import NotificationService
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize notifications
+  await NotificationService().init();
+
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => AlarmProvider())],
@@ -14,6 +20,8 @@ void main() {
 }
 
 class OnboardingApp extends StatelessWidget {
+  const OnboardingApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

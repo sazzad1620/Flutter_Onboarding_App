@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../common_widgets/gradient_container.dart';
 import 'alarm_provider.dart';
+import 'alarm_model.dart';
 import 'package:intl/intl.dart';
 
 class AlarmScreen extends StatelessWidget {
@@ -25,28 +26,28 @@ class AlarmScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 30),
+                          const SizedBox(height: 30),
 
                           // Selected Location
                           Text(
                             provider.selectedLocation ?? "Selected Location",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w500,
                               color: Colors.white,
                             ),
                           ),
 
-                          SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
                           // Location TextField
                           Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Color.fromRGBO(32, 26, 67, 1),
+                              color: const Color.fromRGBO(32, 26, 67, 1),
                               borderRadius: BorderRadius.circular(50),
                             ),
                             child: Row(
@@ -56,15 +57,15 @@ class AlarmScreen extends StatelessWidget {
                                   height: 25,
                                   width: 25,
                                 ),
-                                SizedBox(width: 12),
-                                Expanded(
+                                const SizedBox(width: 12),
+                                const Expanded(
                                   child: TextField(
                                     style: TextStyle(color: Colors.white),
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Add your location",
                                       hintStyle: TextStyle(
-                                        color: const Color.fromARGB(
+                                        color: Color.fromARGB(
                                           150,
                                           255,
                                           255,
@@ -78,10 +79,10 @@ class AlarmScreen extends StatelessWidget {
                             ),
                           ),
 
-                          SizedBox(height: 25),
+                          const SizedBox(height: 25),
 
                           // Alarms Section
-                          Text(
+                          const Text(
                             "Alarms",
                             style: TextStyle(
                               fontSize: 24,
@@ -90,12 +91,12 @@ class AlarmScreen extends StatelessWidget {
                             ),
                           ),
 
-                          SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
                           // Alarm List
                           Expanded(
                             child: provider.alarms.isEmpty
-                                ? Center(
+                                ? const Center(
                                     child: Text(
                                       "No alarms set yet",
                                       style: TextStyle(
@@ -107,105 +108,143 @@ class AlarmScreen extends StatelessWidget {
                                 : ListView.builder(
                                     itemCount: provider.alarms.length,
                                     itemBuilder: (context, index) {
-                                      DateTime alarm = provider.alarms[index];
-                                      bool isToggled = provider.toggles[index];
+                                      AlarmModel alarm = provider.alarms[index];
 
                                       String formattedTime = DateFormat.jm()
-                                          .format(alarm);
+                                          .format(alarm.time);
                                       String formattedDate = DateFormat(
                                         "EEE dd MMM yyyy",
-                                      ).format(alarm);
+                                      ).format(alarm.time);
 
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                          vertical: 7,
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 22,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Color.fromRGBO(32, 26, 67, 1),
-                                          borderRadius: BorderRadius.circular(
-                                            50,
+                                      return Dismissible(
+                                        key: ValueKey(alarm.time.toString()),
+                                        direction: DismissDirection.endToStart,
+                                        background: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 7,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(
+                                              50,
+                                            ),
+                                          ),
+                                          alignment: Alignment.centerRight,
+                                          padding: const EdgeInsets.only(
+                                            right: 20,
+                                          ),
+                                          child: const Icon(
+                                            Icons.delete,
+                                            color: Colors.white,
+                                            size: 28,
                                           ),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            // Alarm Time
-                                            Text(
-                                              formattedTime,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                              ),
+                                        onDismissed: (_) {
+                                          provider.deleteAlarm(index);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Alarm deleted"),
                                             ),
-
-                                            Spacer(),
-
-                                            // Alarm Date
-                                            Text(
-                                              formattedDate,
-                                              style: TextStyle(
-                                                color: const Color.fromARGB(
-                                                  175,
-                                                  255,
-                                                  255,
-                                                  255,
-                                                ),
-                                                fontSize: 16,
-                                              ),
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 7,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 22,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(
+                                              32,
+                                              26,
+                                              67,
+                                              1,
                                             ),
+                                            borderRadius: BorderRadius.circular(
+                                              50,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              // Alarm Time
+                                              Text(
+                                                formattedTime,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
 
-                                            SizedBox(width: 16),
+                                              const Spacer(),
 
-                                            // Toggle Switch
-                                            GestureDetector(
-                                              onTap: () {
-                                                provider.toggleAlarm(index);
-                                              },
-                                              child: AnimatedContainer(
-                                                duration: Duration(
-                                                  milliseconds: 200,
+                                              // Alarm Date
+                                              Text(
+                                                formattedDate,
+                                                style: const TextStyle(
+                                                  color: Color.fromARGB(
+                                                    175,
+                                                    255,
+                                                    255,
+                                                    255,
+                                                  ),
+                                                  fontSize: 16,
                                                 ),
-                                                width: 50,
-                                                height: 24,
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: 2,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: isToggled
-                                                      ? Color.fromRGBO(
-                                                          82,
-                                                          0,
-                                                          255,
-                                                          1,
-                                                        ) // On: purple
-                                                      : Colors
-                                                            .white, // Off: white with low opacity
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: Align(
-                                                  alignment: isToggled
-                                                      ? Alignment.centerRight
-                                                      : Alignment.centerLeft,
-                                                  child: Container(
-                                                    width: 20,
-                                                    height: 20,
-                                                    decoration: BoxDecoration(
-                                                      color: isToggled
-                                                          ? Colors
-                                                                .white // On: white circle
-                                                          : Colors
-                                                                .black, // Off: black circle
-                                                      shape: BoxShape.circle,
+                                              ),
+
+                                              const SizedBox(width: 16),
+
+                                              // Toggle Switch
+                                              GestureDetector(
+                                                onTap: () {
+                                                  provider.toggleAlarm(index);
+                                                },
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(
+                                                    milliseconds: 200,
+                                                  ),
+                                                  width: 50,
+                                                  height: 24,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 2,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: alarm.isEnabled
+                                                        ? const Color.fromRGBO(
+                                                            82,
+                                                            0,
+                                                            255,
+                                                            1,
+                                                          )
+                                                        : Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                  child: Align(
+                                                    alignment: alarm.isEnabled
+                                                        ? Alignment.centerRight
+                                                        : Alignment.centerLeft,
+                                                    child: Container(
+                                                      width: 20,
+                                                      height: 20,
+                                                      decoration: BoxDecoration(
+                                                        color: alarm.isEnabled
+                                                            ? Colors.white
+                                                            : Colors.black,
+                                                        shape: BoxShape.circle,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       );
                                     },
@@ -235,7 +274,9 @@ class AlarmScreen extends StatelessWidget {
                               pickedTime.minute,
                             );
                             if (alarmTime.isBefore(now)) {
-                              alarmTime = alarmTime.add(Duration(days: 1));
+                              alarmTime = alarmTime.add(
+                                const Duration(days: 1),
+                              );
                             }
                             Provider.of<AlarmProvider>(
                               context,
@@ -246,11 +287,15 @@ class AlarmScreen extends StatelessWidget {
                         child: Container(
                           width: 65,
                           height: 65,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: Color.fromRGBO(82, 0, 255, 1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.add, color: Colors.white, size: 32),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                       ),
                     ),
