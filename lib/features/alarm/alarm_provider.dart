@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'alarm_model.dart';
 import 'notification_service.dart';
+import 'package:intl/intl.dart';
 
 class AlarmProvider extends ChangeNotifier {
   List<AlarmModel> _alarms = [];
@@ -13,7 +14,7 @@ class AlarmProvider extends ChangeNotifier {
   bool _notificationsInitialized = false;
   bool _timezoneSet = false;
 
-  // Keep pending alarms until notifications + timezone are ready
+  // Keep pending alarms until notifications & timezone are ready
   final List<AlarmModel> _pendingAlarms = [];
 
   String? selectedLocation;
@@ -27,12 +28,11 @@ class AlarmProvider extends ChangeNotifier {
     await _notificationService.init();
     _notificationsInitialized = _notificationService.isInitialized;
 
-    // Load saved alarms after notifications are initialized
     await loadAlarms();
 
     _timezoneSet = true;
 
-    // Schedule all enabled alarms + pending alarms
+    // Schedule all enabled alarms & pending alarms
     await _rescheduleEnabledAndPendingAlarms();
   }
 
@@ -53,7 +53,6 @@ class AlarmProvider extends ChangeNotifier {
     _pendingAlarms.clear();
   }
 
-  // CRUD
   void addAlarm(DateTime alarmTime) {
     final model = AlarmModel(time: alarmTime, isEnabled: true);
     _alarms.add(model);
@@ -131,7 +130,7 @@ class AlarmProvider extends ChangeNotifier {
     await prefs.setString('alarms', alarmsJson);
   }
 
-  // -------------------- Notifications --------------------
+  // Notifications
   Future<void> _scheduleNotification(AlarmModel alarm) async {
     if (!_notificationsInitialized || !_timezoneSet) return;
 
@@ -142,12 +141,13 @@ class AlarmProvider extends ChangeNotifier {
         ? alarm.time.add(Duration(days: 1))
         : alarm.time;
 
+    String formattedTime = DateFormat.jm().format(scheduledDate).toLowerCase();
+
     await _notificationService.scheduleNotification(
       dateTime: scheduledDate,
       id: id,
       title: 'Alarm',
-      body:
-          'It\'s time: ${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}',
+      body: 'It\'s time: $formattedTime',
     );
   }
 

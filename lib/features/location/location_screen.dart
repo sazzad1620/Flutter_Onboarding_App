@@ -26,6 +26,7 @@ class LocationScreen extends StatelessWidget {
                     // Heading
                     Text(
                       "Welcome! Your Smart Travel Alarm",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 31,
                         fontWeight: FontWeight.w600,
@@ -36,12 +37,13 @@ class LocationScreen extends StatelessWidget {
                     // Paragraph
                     Text(
                       "Stay on schedule and enjoy every moment of your journey.",
+                      textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                     SizedBox(height: 30),
                     // Image
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Image.asset(
                         'assets/images/location.png',
                         width: double.infinity,
@@ -109,7 +111,7 @@ class LocationScreen extends StatelessWidget {
                                 listen: false,
                               );
 
-                          // Fetch location if not yet fetched
+                          // Fetch location if not fetched
                           if (locationProvider.currentAddress == null) {
                             await locationProvider.fetchLocation();
                           }

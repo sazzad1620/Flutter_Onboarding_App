@@ -38,7 +38,7 @@ class AlarmScreen extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 15),
 
                           // Location TextField
                           Container(
@@ -111,7 +111,8 @@ class AlarmScreen extends StatelessWidget {
                                       AlarmModel alarm = provider.alarms[index];
 
                                       String formattedTime = DateFormat.jm()
-                                          .format(alarm.time);
+                                          .format(alarm.time)
+                                          .toLowerCase();
                                       String formattedDate = DateFormat(
                                         "EEE dd MMM yyyy",
                                       ).format(alarm.time);
@@ -141,21 +142,14 @@ class AlarmScreen extends StatelessWidget {
                                         ),
                                         onDismissed: (_) {
                                           provider.deleteAlarm(index);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text("Alarm deleted"),
-                                            ),
-                                          );
                                         },
                                         child: Container(
                                           margin: const EdgeInsets.symmetric(
                                             vertical: 7,
                                           ),
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 22,
+                                            horizontal: 18,
+                                            vertical: 20,
                                           ),
                                           decoration: BoxDecoration(
                                             color: const Color.fromRGBO(
@@ -195,7 +189,7 @@ class AlarmScreen extends StatelessWidget {
                                                 ),
                                               ),
 
-                                              const SizedBox(width: 16),
+                                              const SizedBox(width: 8),
 
                                               // Toggle Switch
                                               GestureDetector(

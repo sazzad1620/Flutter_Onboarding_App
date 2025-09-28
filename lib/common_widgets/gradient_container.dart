@@ -34,19 +34,16 @@ class GradientContainer extends StatelessWidget {
         children: [
           // Ellipse left center
           Positioned(
-            top: screenHeight * fracY(360),
-            left: screenWidth * fracX(-155),
+            top: screenHeight * fracY(280),
+            left: screenWidth * fracX(-210),
             child: Container(
-              width: screenWidth * fracX(300), // bigger for soft spread
-              height: screenHeight * fracY(300),
+              width: screenWidth * fracX(400),
+              height: screenHeight * fracY(400),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    Color.fromRGBO(82, 0, 255, 0.18),
-                    Colors.transparent,
-                  ],
-                  radius: 0.8, // spread more
+                  colors: [Color.fromRGBO(82, 0, 255, 0.2), Colors.transparent],
+                  radius: 0.8,
                   center: Alignment.center,
                 ),
               ),
@@ -55,16 +52,16 @@ class GradientContainer extends StatelessWidget {
 
           // Ellipse upper right
           Positioned(
-            top: screenHeight * fracY(183),
-            left: screenWidth * fracX(240),
+            top: screenHeight * fracY(150),
+            left: screenWidth * fracX(210),
             child: Container(
-              width: screenWidth * fracX(150),
-              height: screenHeight * fracY(150),
+              width: screenWidth * fracX(200),
+              height: screenHeight * fracY(200),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Color.fromRGBO(81, 0, 255, 0.08),
+                    Color.fromRGBO(81, 0, 255, 0.12),
                     Colors.transparent,
                   ],
                   radius: 0.8,
@@ -76,18 +73,15 @@ class GradientContainer extends StatelessWidget {
 
           // Ellipse 3 lower right
           Positioned(
-            top: screenHeight * fracY(500),
-            left: screenWidth * fracX(220),
+            top: screenHeight * fracY(450),
+            left: screenWidth * fracX(170),
             child: Container(
-              width: screenWidth * fracX(300),
-              height: screenHeight * fracY(300),
+              width: screenWidth * fracX(400),
+              height: screenHeight * fracY(400),
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [
-                    Color.fromRGBO(82, 0, 255, 0.18),
-                    Colors.transparent,
-                  ],
+                  colors: [Color.fromRGBO(82, 0, 255, 0.2), Colors.transparent],
                   radius: 0.8,
                   center: Alignment.center,
                 ),

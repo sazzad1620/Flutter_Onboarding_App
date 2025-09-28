@@ -11,6 +11,13 @@ void main() async {
   // Initialize notifications
   await NotificationService().init();
 
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => AlarmProvider())],
