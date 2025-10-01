@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'features/onboarding/onboarding_screen.dart';
-import 'features/alarm/alarm_provider.dart'; // import your AlarmProvider
-import 'features/alarm/notification_service.dart'; // import NotificationService
+import 'features/alarm/alarm_provider.dart';
+import 'features/alarm/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
