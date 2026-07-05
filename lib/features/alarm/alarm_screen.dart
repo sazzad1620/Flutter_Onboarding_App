@@ -12,14 +12,12 @@ class AlarmScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AlarmProvider()..setLocation(selectedLocation),
-      child: Scaffold(
-        body: GradientContainer(
-          child: SafeArea(
-            child: Consumer<AlarmProvider>(
-              builder: (context, provider, _) {
-                return Stack(
+    return Scaffold(
+      body: GradientContainer(
+        child: SafeArea(
+          child: Consumer<AlarmProvider>(
+            builder: (context, provider, _) {
+              return Stack(
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -30,7 +28,8 @@ class AlarmScreen extends StatelessWidget {
 
                           // Selected Location
                           Text(
-                            provider.selectedLocation ?? "Selected Location",
+                            provider.selectedLocation ??
+                                selectedLocation,
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w500,
@@ -258,7 +257,7 @@ class AlarmScreen extends StatelessWidget {
                             context: context,
                             initialTime: TimeOfDay.now(),
                           );
-                          if (pickedTime != null) {
+                          if (pickedTime != null && context.mounted) {
                             DateTime now = DateTime.now();
                             DateTime alarmTime = DateTime(
                               now.year,
@@ -299,7 +298,6 @@ class AlarmScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

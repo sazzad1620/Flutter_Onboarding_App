@@ -22,7 +22,8 @@ Follow these steps to get the project running locally:
 - Geolocator (^10.0.0) → To access device location (used in location field).
 - Geocoding (^2.1.1) → To convert coordinates into human-readable addresses.
 - Flutter Local Notifications (^19.4.2) → To schedule and display alarms/notifications.
-- Timezone (^0.10.1) + Flutter Timezone (^5.0.0) + Flutter Native Timezone (^2.0.0) → To handle alarm scheduling correctly with time zones.
+- Timezone (^0.10.1) + Flutter Timezone (^5.0.0) → To handle alarm scheduling correctly with time zones.
+- Android alarm setup requires `POST_NOTIFICATIONS`, exact-alarm permissions, and scheduled notification receivers in `AndroidManifest.xml` (see [flutter_local_notifications Android setup](https://pub.dev/packages/flutter_local_notifications)).
 - Fluttertoast (^8.2.1) → For showing small toast messages (e.g., confirmation).
 - Cupertino Icons (^1.0.8) → iOS-style icons.
 
@@ -54,6 +55,9 @@ Follow these steps to get the project running locally:
 
 ### Resubmission Notes / Updates
 
+- Android build updated: Gradle 8.14, AGP 8.11.1, and Kotlin 2.2.20 for compatibility with current Flutter SDK.
+- Replaced deprecated `flutter_native_timezone` with `flutter_timezone` (maintained fork) to fix Android namespace build errors.
+- Fixed Android alarm notifications: added manifest permissions/receivers, runtime permission requests, and shared `NotificationService` singleton.
 - Notification system added: Alarms now trigger notifications at the set time.
 - Updated design: One of the pages was updated to match the latest Figma design.
 - UX improvement: Swap-to-delete functionality was added for alarms to enhance user experience.

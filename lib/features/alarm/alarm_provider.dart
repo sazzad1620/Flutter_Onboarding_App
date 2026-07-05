@@ -9,7 +9,7 @@ class AlarmProvider extends ChangeNotifier {
   List<AlarmModel> _alarms = [];
   List<AlarmModel> get alarms => _alarms;
 
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService = NotificationService.instance;
 
   bool _notificationsInitialized = false;
   bool _timezoneSet = false;
@@ -53,14 +53,14 @@ class AlarmProvider extends ChangeNotifier {
     _pendingAlarms.clear();
   }
 
-  void addAlarm(DateTime alarmTime) {
+  Future<void> addAlarm(DateTime alarmTime) async {
     final model = AlarmModel(time: alarmTime, isEnabled: true);
     _alarms.add(model);
     _alarms.sort((a, b) => a.time.compareTo(b.time));
     saveAlarms();
 
     if (_notificationsInitialized && _timezoneSet) {
-      _scheduleNotification(model);
+      await _scheduleNotification(model);
     } else {
       _pendingAlarms.add(model);
     }
@@ -135,16 +135,10 @@ class AlarmProvider extends ChangeNotifier {
     if (!_notificationsInitialized || !_timezoneSet) return;
 
     int id = alarm.time.millisecondsSinceEpoch.remainder(100000);
-
-    final now = DateTime.now();
-    DateTime scheduledDate = alarm.time.isBefore(now)
-        ? alarm.time.add(Duration(days: 1))
-        : alarm.time;
-
-    String formattedTime = DateFormat.jm().format(scheduledDate).toLowerCase();
+    String formattedTime = DateFormat.jm().format(alarm.time).toLowerCase();
 
     await _notificationService.scheduleNotification(
-      dateTime: scheduledDate,
+      dateTime: alarm.time,
       id: id,
       title: 'Alarm',
       body: 'It\'s time: $formattedTime',

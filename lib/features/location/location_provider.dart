@@ -56,7 +56,7 @@ class LocationProvider extends ChangeNotifier {
       }
     } catch (e) {
       currentAddress = "Error fetching location";
-      print("LocationProvider error: $e");
+      debugPrint("LocationProvider error: $e");
     }
 
     isLoading = false;

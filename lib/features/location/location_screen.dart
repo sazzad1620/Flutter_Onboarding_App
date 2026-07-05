@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../common_widgets/gradient_container.dart';
+import '../alarm/alarm_provider.dart';
 import '../alarm/alarm_screen.dart';
 import 'location_provider.dart';
 
@@ -116,9 +117,15 @@ class LocationScreen extends StatelessWidget {
                             await locationProvider.fetchLocation();
                           }
 
-                          String location =
+                          if (!context.mounted) return;
+
+                          final location =
                               locationProvider.currentAddress ??
                               "Unknown Location";
+
+                          final alarmProvider =
+                              Provider.of<AlarmProvider>(context, listen: false);
+                          alarmProvider.setLocation(location);
 
                           Navigator.push(
                             context,
@@ -138,7 +145,7 @@ class LocationScreen extends StatelessWidget {
                               ),
                               shadowColor: Colors.transparent,
                             ).copyWith(
-                              overlayColor: MaterialStateProperty.all(
+                              overlayColor: WidgetStateProperty.all(
                                 Colors.transparent,
                               ),
                             ),
